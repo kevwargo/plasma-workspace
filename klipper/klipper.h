@@ -62,6 +62,9 @@ public Q_SLOTS:
   Q_SCRIPTABLE QString getClipboardHistoryItem(int i);
   Q_SCRIPTABLE void showKlipperPopupMenu();
   Q_SCRIPTABLE void showKlipperManuallyInvokeActionMenu();
+  Q_SCRIPTABLE void moveToTop(QString uuid);
+  Q_SCRIPTABLE QStringList historySlice(QString last_uuid, int count);
+  Q_SCRIPTABLE QString nextItem(QString uuidhex);
 
 public:
     Klipper(QObject* parent, const KSharedConfigPtr& config, KlipperMode mode = KlipperMode::Standalone);
@@ -156,6 +159,7 @@ private Q_SLOTS:
 private:
 
     static void updateTimestamp();
+    QString encodeItem(QSharedPointer<const HistoryItem>);
 
     QClipboard* m_clip;
 

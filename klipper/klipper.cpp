@@ -1038,3 +1038,51 @@ QString Klipper::cycleText() const
     return result;
 }
 
+void Klipper::moveToTop(QString uuid)
+{
+    history()->slotMoveToTop(QByteArray::fromBase64(uuid.toLatin1()));
+}
+
+QString Klipper::encodeItem(QSharedPointer<const HistoryItem> item)
+{
+    QByteArray ba;
+    ba.append(item->text());
+    return item->uuid().toBase64() + " " + ba.toBase64();
+}
+
+QStringList Klipper::historySlice(QString last_uuid, int count)
+{
+    QSharedPointer<const HistoryItem> head;
+    QSharedPointer<const HistoryItem> item;
+    QStringList result;
+    if (count <= 0 && count != -1)
+        return result;
+    if (last_uuid.isEmpty()) {
+        head = history()->first();
+        if (head) {
+            result << encodeItem(head);
+            if (count != -1)
+                count--;
+        }
+    } else {
+        head = history()->find(QByteArray::fromBase64(last_uuid.toLatin1()));
+    }
+    if (head) {
+        for (auto item = history()->find(head->next_uuid());
+             item && item != head && item != history()->first()
+                 && (count == -1 || count-- > 0);
+             item = history()->find(item->next_uuid())) {
+            result << encodeItem(item);
+        }
+    }
+    return result;
+}
+
+QString Klipper::nextItem(QString uuidhex)
+{
+    auto item = history()->find(QByteArray::fromHex(uuidhex.toLatin1()));
+    if (item) {
+        return QString(item->next_uuid().toHex());
+    }
+    return QString();
+}
